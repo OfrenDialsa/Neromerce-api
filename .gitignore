@@ -2,4 +2,5 @@
 storage/
 assets/
 volumes/
+tmp/
 .idea/
