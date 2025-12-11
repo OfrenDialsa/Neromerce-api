@@ -5,6 +5,9 @@ import (
 	authController "github.com/ofrendialsa/neromerce/modules/auth/controller"
 	authRepo "github.com/ofrendialsa/neromerce/modules/auth/repository"
 	authService "github.com/ofrendialsa/neromerce/modules/auth/service"
+	categoryController "github.com/ofrendialsa/neromerce/modules/category/controller"
+	categoryRepo "github.com/ofrendialsa/neromerce/modules/category/repository"
+	categoryService "github.com/ofrendialsa/neromerce/modules/category/service"
 	userController "github.com/ofrendialsa/neromerce/modules/user/controller"
 	"github.com/ofrendialsa/neromerce/modules/user/repository"
 	userService "github.com/ofrendialsa/neromerce/modules/user/service"
@@ -31,9 +34,11 @@ func RegisterDependencies(injector *do.Injector) {
 
 	userRepository := repository.NewUserRepository(db)
 	refreshTokenRepository := authRepo.NewRefreshTokenRepository(db)
+	categoryRepository := categoryRepo.NewCategoryRepository(db)
 
 	userService := userService.NewUserService(userRepository, db)
 	authService := authService.NewAuthService(userRepository, refreshTokenRepository, jwtService, db)
+	categoryService := categoryService.NewCategoryService(categoryRepository, db)
 
 	do.Provide(
 		injector, func(i *do.Injector) (userController.UserController, error) {
@@ -44,6 +49,12 @@ func RegisterDependencies(injector *do.Injector) {
 	do.Provide(
 		injector, func(i *do.Injector) (authController.AuthController, error) {
 			return authController.NewAuthController(i, authService), nil
+		},
+	)
+
+	do.Provide(
+		injector, func(i *do.Injector) (categoryController.CategoryController, error) {
+			return categoryController.NewCategoryController(i, categoryService), nil
 		},
 	)
 }
