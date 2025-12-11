@@ -3,4 +3,5 @@ storage/
 assets/
 volumes/
 tmp/
+.cache/
 .idea/

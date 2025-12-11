@@ -4,8 +4,11 @@ services:
       context: .
       dockerfile: ./docker/Dockerfile
     container_name: ${APP_NAME}-app
+    user: "1000:1000"
     volumes:
       - .:/app
+    environment:
+      - GOCACHE=/app/.cache/go-build
     ports:
       - ${GOLANG_PORT:-8888}:8888
     networks:
@@ -29,7 +32,7 @@ services:
     container_name: ${APP_NAME}-db
     image: postgres:latest
     ports:
-      - ${DB_PORT}:5432
+      - 5433:5432
     volumes:
       - app-data:/var/lib/postgresql
     environment:

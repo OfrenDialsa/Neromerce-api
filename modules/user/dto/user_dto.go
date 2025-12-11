@@ -63,6 +63,7 @@ type (
 		ImageUrl   string `json:"image_url"`
 		IsVerified bool   `json:"is_verified"`
 	}
+
 	UserUpdateRequest struct {
 		Name       string `json:"name" form:"name" binding:"omitempty,min=2,max=100"`
 		TelpNumber string `json:"telp_number" form:"telp_number" binding:"omitempty,min=8,max=20"`
