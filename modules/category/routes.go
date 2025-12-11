@@ -12,12 +12,14 @@ import (
 func RegisterRoutes(server *gin.Engine, injector *do.Injector) {
 	categoryController := do.MustInvoke[controller.CategoryController](injector)
 	jwtService := do.MustInvokeNamed[service.JWTService](injector, constants.JWTService)
+	authAccess := middlewares.Authenticate(jwtService)
+	roleAccess := middlewares.AuthorizeRole(jwtService, "admin")
 
 	categoryRoutes := server.Group("/api/category")
 	{
 		categoryRoutes.GET("", categoryController.GetAll)
-		categoryRoutes.POST("", middlewares.Authenticate(jwtService), categoryController.Create)
+		categoryRoutes.POST("", authAccess, roleAccess, categoryController.Create)
 		categoryRoutes.GET("/:id", categoryController.GetCategoryByID)
-		categoryRoutes.DELETE("/:id", middlewares.Authenticate(jwtService), categoryController.Delete)
+		categoryRoutes.DELETE("/:id", authAccess, roleAccess, categoryController.Delete)
 	}
 }
