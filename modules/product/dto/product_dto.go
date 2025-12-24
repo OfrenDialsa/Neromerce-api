@@ -6,9 +6,9 @@ const (
 )
 
 type (
-	ProductsCreateRequest struct {
+	ProductCreateRequest struct {
 	}
 
-	ProductsResponse struct {
+	ProductResponse struct {
 	}
 )

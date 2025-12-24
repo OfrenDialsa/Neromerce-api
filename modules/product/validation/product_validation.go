@@ -4,13 +4,13 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-type ProductsValidation struct {
+type ProductValidation struct {
 	validate *validator.Validate
 }
 
-func NewProductsValidation() *ProductsValidation {
+func NewProductValidation() *ProductValidation {
 	validate := validator.New()
-	return &ProductsValidation{
+	return &ProductValidation{
 		validate: validate,
 	}
 }
