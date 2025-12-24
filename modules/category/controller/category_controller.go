@@ -2,6 +2,7 @@ package controller
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/ofrendialsa/neromerce/modules/category/dto"
@@ -80,8 +81,15 @@ func (c *categoryController) GetAll(ctx *gin.Context) {
 
 // GetCategoryByID implements CategoryController.
 func (c *categoryController) GetCategoryByID(ctx *gin.Context) {
-	categoryId := ctx.Param("id")
-	category, err := c.categoryService.GetCategoryById(ctx.Request.Context(), categoryId)
+	idParam := ctx.Param("id")
+	categoryId, err := strconv.ParseUint(idParam, 10, 64) // parse string ke uint64
+	if err != nil {
+		res := utils.BuildResponseFailed(dto.MESSAGE_FAILED_GET_CATEGORY, "invalid category id", nil)
+		ctx.JSON(http.StatusBadRequest, res)
+		return
+	}
+
+	category, err := c.categoryService.GetCategoryById(ctx.Request.Context(), uint(categoryId))
 	if err != nil {
 		res := utils.BuildResponseFailed(dto.MESSAGE_FAILED_GET_CATEGORY, err.Error(), nil)
 		ctx.JSON(http.StatusNotFound, res)
@@ -92,11 +100,16 @@ func (c *categoryController) GetCategoryByID(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, res)
 }
 
-// Delete implements CategoryController.
 func (c *categoryController) Delete(ctx *gin.Context) {
-	categoryId := ctx.Param("id")
+	idParam := ctx.Param("id")
+	categoryId, err := strconv.ParseUint(idParam, 10, 64)
+	if err != nil {
+		res := utils.BuildResponseFailed(dto.MESSAGE_FAILED_DELETE_CATEGORY, "invalid category id", nil)
+		ctx.JSON(http.StatusBadRequest, res)
+		return
+	}
 
-	if err := c.categoryService.Delete(ctx.Request.Context(), categoryId); err != nil {
+	if err := c.categoryService.Delete(ctx.Request.Context(), uint(categoryId)); err != nil {
 		res := utils.BuildResponseFailed(dto.MESSAGE_FAILED_DELETE_CATEGORY, err.Error(), nil)
 		ctx.JSON(http.StatusBadRequest, res)
 		return
