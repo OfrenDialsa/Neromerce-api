@@ -2,8 +2,8 @@ package service
 
 import (
 	"context"
+	"strconv"
 
-	"github.com/google/uuid"
 	"github.com/ofrendialsa/neromerce/database/entities"
 	"github.com/ofrendialsa/neromerce/modules/category/dto"
 	"github.com/ofrendialsa/neromerce/modules/category/repository"
@@ -13,8 +13,8 @@ import (
 type CategoryService interface {
 	Create(ctx context.Context, req dto.CategoryCreateRequest) (dto.CategoryResponse, error)
 	GetAll(ctx context.Context) ([]dto.CategoryResponse, error)
-	GetCategoryById(ctx context.Context, categoryId string) (dto.CategoryResponse, error)
-	Delete(ctx context.Context, categoryId string) error
+	GetCategoryById(ctx context.Context, categoryId uint) (dto.CategoryResponse, error)
+	Delete(ctx context.Context, categoryId uint) error
 }
 
 type categoryService struct {
@@ -31,8 +31,7 @@ func NewCategoryService(repo repository.CategoryRepository, db *gorm.DB) Categor
 
 func (s *categoryService) Create(ctx context.Context, req dto.CategoryCreateRequest) (dto.CategoryResponse, error) {
 	category := entities.Category{
-		ID:   uuid.New(),
-		Name: req.Name,
+		Name: req.Name, // ID auto increment, tidak perlu set manual
 	}
 
 	saved, err := s.categoryRepo.CreateCategory(ctx, s.db, category)
@@ -41,7 +40,7 @@ func (s *categoryService) Create(ctx context.Context, req dto.CategoryCreateRequ
 	}
 
 	return dto.CategoryResponse{
-		ID:   saved.ID.String(),
+		ID:   strconv.Itoa(int(saved.ID)), // jika response tetap string
 		Name: saved.Name,
 	}, nil
 }
@@ -55,25 +54,25 @@ func (s *categoryService) GetAll(ctx context.Context) ([]dto.CategoryResponse, e
 	var resp []dto.CategoryResponse
 	for _, cat := range categories {
 		resp = append(resp, dto.CategoryResponse{
-			ID:   cat.ID.String(),
+			ID:   strconv.Itoa(int(cat.ID)),
 			Name: cat.Name,
 		})
 	}
 	return resp, nil
 }
 
-func (s *categoryService) GetCategoryById(ctx context.Context, categoryId string) (dto.CategoryResponse, error) {
+func (s *categoryService) GetCategoryById(ctx context.Context, categoryId uint) (dto.CategoryResponse, error) {
 	category, err := s.categoryRepo.GetCategoryByID(ctx, s.db, categoryId)
 	if err != nil {
 		return dto.CategoryResponse{}, err
 	}
 
 	return dto.CategoryResponse{
-		ID:   category.ID.String(),
+		ID:   strconv.Itoa(int(category.ID)),
 		Name: category.Name,
 	}, nil
 }
 
-func (s *categoryService) Delete(ctx context.Context, categoryId string) error {
+func (s *categoryService) Delete(ctx context.Context, categoryId uint) error {
 	return s.categoryRepo.DeleteCategory(ctx, s.db, categoryId)
 }

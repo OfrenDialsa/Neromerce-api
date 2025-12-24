@@ -52,3 +52,37 @@ func Authenticate(jwtService service.JWTService) gin.HandlerFunc {
 		ctx.Next()
 	}
 }
+
+func AuthorizeRole(jwtService service.JWTService, allowedRoles ...string) gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		token, exists := ctx.Get("token")
+		if !exists {
+			response := utils.BuildResponseFailed(dto.MESSAGE_FAILED_PROSES_REQUEST, "Token tidak ditemukan", nil)
+			ctx.AbortWithStatusJSON(http.StatusUnauthorized, response)
+			return
+		}
+
+		role, err := jwtService.GetUserRoleByToken(token.(string))
+		if err != nil {
+			response := utils.BuildResponseFailed(dto.MESSAGE_FAILED_PROSES_REQUEST, "Gagal mendapatkan role", nil)
+			ctx.AbortWithStatusJSON(http.StatusUnauthorized, response)
+			return
+		}
+
+		authorized := false
+		for _, r := range allowedRoles {
+			if r == role {
+				authorized = true
+				break
+			}
+		}
+
+		if !authorized {
+			response := utils.BuildResponseFailed(dto.MESSAGE_FAILED_PROSES_REQUEST, dto.MESSAGE_FAILED_FORBIDDEN, nil)
+			ctx.AbortWithStatusJSON(http.StatusForbidden, response)
+			return
+		}
+
+		ctx.Next()
+	}
+}

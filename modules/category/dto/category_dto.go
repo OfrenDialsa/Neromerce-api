@@ -28,7 +28,7 @@ var (
 
 type (
 	CategoryCreateRequest struct {
-		Name string `json:"name" form:"name" binding:"required,min=2,max=100"`
+		Name string `json:"name" validate:"required,name"`
 	}
 
 	CategoryResponse struct {

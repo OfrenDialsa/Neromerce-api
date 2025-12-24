@@ -30,6 +30,9 @@ test-auth:
 test-user:
 	go test -v ./modules/user/tests/...
 
+test-product:
+	go test -v ./modules/product/tests/...
+
 test-all:
 	go test -v ./modules/.../tests/...
 

@@ -1,7 +1,7 @@
 package products
 
 import (
-	// "github.com/ofrendialsa/neromerce/modules/products/controller"
+	// "github.com/ofrendialsa/neromerce/modules/product/controller"
 	"github.com/gin-gonic/gin"
 	"github.com/samber/do"
 )

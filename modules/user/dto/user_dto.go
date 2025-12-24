@@ -19,6 +19,7 @@ const (
 	MESSAGE_FAILED_PROSES_REQUEST     = "failed proses request"
 	MESSAGE_FAILED_DENIED_ACCESS      = "denied access"
 	MESSAGE_FAILED_VERIFY_EMAIL       = "failed verify email"
+	MESSAGE_FAILED_FORBIDDEN          = "forbidden"
 
 	// Success
 	MESSAGE_SUCCESS_REGISTER_USER           = "success create user"
