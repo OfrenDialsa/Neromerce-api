@@ -8,113 +8,153 @@ import (
 	"github.com/ofrendialsa/neromerce/modules/category/dto"
 	"github.com/ofrendialsa/neromerce/modules/category/service"
 	"github.com/ofrendialsa/neromerce/modules/category/validation"
-	"github.com/ofrendialsa/neromerce/pkg/constants"
 	"github.com/ofrendialsa/neromerce/pkg/utils"
-	"github.com/samber/do"
-	"gorm.io/gorm"
 )
 
-type (
-	CategoryController interface {
-		Create(ctx *gin.Context)
-		GetAll(ctx *gin.Context)
-		GetCategoryByID(ctx *gin.Context)
-		Delete(ctx *gin.Context)
-	}
+type CategoryController interface {
+	Create(ctx *gin.Context)
+	GetAll(ctx *gin.Context)
+	GetCategoryByID(ctx *gin.Context)
+	Delete(ctx *gin.Context)
+}
 
-	categoryController struct {
-		categoryService    service.CategoryService
-		categoryValidation *validation.CategoryValidation
-		db                 *gorm.DB
-	}
-)
+type categoryController struct {
+	categoryService    service.CategoryService
+	categoryValidation *validation.CategoryValidation
+}
 
-func NewCategoryController(injector *do.Injector, s service.CategoryService) CategoryController {
-	db := do.MustInvokeNamed[*gorm.DB](injector, constants.DB)
-	categoryValidation := validation.NewCategoryValidation()
+func NewCategoryController(s service.CategoryService) CategoryController {
 	return &categoryController{
 		categoryService:    s,
-		categoryValidation: categoryValidation,
-		db:                 db,
+		categoryValidation: validation.NewCategoryValidation(),
 	}
 }
 
-// Create implements CategoryController.
 func (c *categoryController) Create(ctx *gin.Context) {
 	var req dto.CategoryCreateRequest
+
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		res := utils.BuildResponseFailed(dto.MESSAGE_FAILED_GET_DATA_FROM_BODY, err.Error(), nil)
+		res := utils.BuildResponseFailed(
+			dto.MESSAGE_FAILED_GET_DATA_FROM_BODY,
+			err.Error(),
+			nil,
+		)
 		ctx.JSON(http.StatusBadRequest, res)
 		return
 	}
 
-	// Validasi
 	if err := c.categoryValidation.ValidateCategoryCreateRequest(req); err != nil {
-		res := utils.BuildResponseFailed(dto.MESSAGE_FAILED_CREATE_CATEGORY, err.Error(), nil)
+		res := utils.BuildResponseFailed(
+			dto.MESSAGE_FAILED_CREATE_CATEGORY,
+			err.Error(),
+			nil,
+		)
 		ctx.JSON(http.StatusBadRequest, res)
 		return
 	}
 
 	category, err := c.categoryService.Create(ctx.Request.Context(), req)
 	if err != nil {
-		res := utils.BuildResponseFailed(dto.MESSAGE_FAILED_CREATE_CATEGORY, err.Error(), nil)
+		res := utils.BuildResponseFailed(
+			dto.MESSAGE_FAILED_CREATE_CATEGORY,
+			err.Error(),
+			nil,
+		)
 		ctx.JSON(http.StatusInternalServerError, res)
 		return
 	}
 
-	res := utils.BuildResponseSuccess(dto.MESSAGE_SUCCESS_CREATE_CATEGORY, category)
+	res := utils.BuildResponseSuccess(
+		dto.MESSAGE_SUCCESS_CREATE_CATEGORY,
+		category,
+	)
 	ctx.JSON(http.StatusOK, res)
 }
 
-// GetAll implements CategoryController.
 func (c *categoryController) GetAll(ctx *gin.Context) {
 	categories, err := c.categoryService.GetAll(ctx.Request.Context())
 	if err != nil {
-		res := utils.BuildResponseFailed(dto.MESSAGE_FAILED_GET_LIST_CATEGORY, err.Error(), nil)
+		res := utils.BuildResponseFailed(
+			dto.MESSAGE_FAILED_GET_LIST_CATEGORY,
+			err.Error(),
+			nil,
+		)
 		ctx.JSON(http.StatusInternalServerError, res)
 		return
 	}
 
-	res := utils.BuildResponseSuccess(dto.MESSAGE_SUCCESS_GET_LIST_CATEGORY, categories)
+	res := utils.BuildResponseSuccess(
+		dto.MESSAGE_SUCCESS_GET_LIST_CATEGORY,
+		categories,
+	)
 	ctx.JSON(http.StatusOK, res)
 }
 
-// GetCategoryByID implements CategoryController.
 func (c *categoryController) GetCategoryByID(ctx *gin.Context) {
 	idParam := ctx.Param("id")
-	categoryId, err := strconv.ParseUint(idParam, 10, 64) // parse string ke uint64
+
+	categoryId, err := strconv.ParseUint(idParam, 10, 64)
 	if err != nil {
-		res := utils.BuildResponseFailed(dto.MESSAGE_FAILED_GET_CATEGORY, "invalid category id", nil)
+		res := utils.BuildResponseFailed(
+			dto.MESSAGE_FAILED_GET_CATEGORY,
+			"invalid category id",
+			nil,
+		)
 		ctx.JSON(http.StatusBadRequest, res)
 		return
 	}
 
-	category, err := c.categoryService.GetCategoryById(ctx.Request.Context(), uint(categoryId))
+	category, err := c.categoryService.GetCategoryById(
+		ctx.Request.Context(),
+		uint(categoryId),
+	)
 	if err != nil {
-		res := utils.BuildResponseFailed(dto.MESSAGE_FAILED_GET_CATEGORY, err.Error(), nil)
+		res := utils.BuildResponseFailed(
+			dto.MESSAGE_FAILED_GET_CATEGORY,
+			err.Error(),
+			nil,
+		)
 		ctx.JSON(http.StatusNotFound, res)
 		return
 	}
 
-	res := utils.BuildResponseSuccess(dto.MESSAGE_SUCCESS_GET_CATEGORY, category)
+	res := utils.BuildResponseSuccess(
+		dto.MESSAGE_SUCCESS_GET_CATEGORY,
+		category,
+	)
 	ctx.JSON(http.StatusOK, res)
 }
 
 func (c *categoryController) Delete(ctx *gin.Context) {
 	idParam := ctx.Param("id")
+
 	categoryId, err := strconv.ParseUint(idParam, 10, 64)
 	if err != nil {
-		res := utils.BuildResponseFailed(dto.MESSAGE_FAILED_DELETE_CATEGORY, "invalid category id", nil)
+		res := utils.BuildResponseFailed(
+			dto.MESSAGE_FAILED_DELETE_CATEGORY,
+			"invalid category id",
+			nil,
+		)
 		ctx.JSON(http.StatusBadRequest, res)
 		return
 	}
 
-	if err := c.categoryService.Delete(ctx.Request.Context(), uint(categoryId)); err != nil {
-		res := utils.BuildResponseFailed(dto.MESSAGE_FAILED_DELETE_CATEGORY, err.Error(), nil)
+	if err := c.categoryService.Delete(
+		ctx.Request.Context(),
+		uint(categoryId),
+	); err != nil {
+		res := utils.BuildResponseFailed(
+			dto.MESSAGE_FAILED_DELETE_CATEGORY,
+			err.Error(),
+			nil,
+		)
 		ctx.JSON(http.StatusBadRequest, res)
 		return
 	}
 
-	res := utils.BuildResponseSuccess(dto.MESSAGE_SUCCESS_DELETE_CATEGORY, nil)
+	res := utils.BuildResponseSuccess(
+		dto.MESSAGE_SUCCESS_DELETE_CATEGORY,
+		nil,
+	)
 	ctx.JSON(http.StatusOK, res)
 }

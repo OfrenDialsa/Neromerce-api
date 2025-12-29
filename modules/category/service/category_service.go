@@ -7,7 +7,6 @@ import (
 	"github.com/ofrendialsa/neromerce/database/entities"
 	"github.com/ofrendialsa/neromerce/modules/category/dto"
 	"github.com/ofrendialsa/neromerce/modules/category/repository"
-	"gorm.io/gorm"
 )
 
 type CategoryService interface {
@@ -19,13 +18,11 @@ type CategoryService interface {
 
 type categoryService struct {
 	categoryRepo repository.CategoryRepository
-	db           *gorm.DB
 }
 
-func NewCategoryService(repo repository.CategoryRepository, db *gorm.DB) CategoryService {
+func NewCategoryService(repo repository.CategoryRepository) CategoryService {
 	return &categoryService{
 		categoryRepo: repo,
-		db:           db,
 	}
 }
 
@@ -34,7 +31,7 @@ func (s *categoryService) Create(ctx context.Context, req dto.CategoryCreateRequ
 		Name: req.Name, // ID auto increment, tidak perlu set manual
 	}
 
-	saved, err := s.categoryRepo.CreateCategory(ctx, s.db, category)
+	saved, err := s.categoryRepo.CreateCategory(ctx, category)
 	if err != nil {
 		return dto.CategoryResponse{}, err
 	}
@@ -46,7 +43,7 @@ func (s *categoryService) Create(ctx context.Context, req dto.CategoryCreateRequ
 }
 
 func (s *categoryService) GetAll(ctx context.Context) ([]dto.CategoryResponse, error) {
-	categories, err := s.categoryRepo.GetAllCategories(ctx, s.db)
+	categories, err := s.categoryRepo.GetAllCategories(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -62,7 +59,7 @@ func (s *categoryService) GetAll(ctx context.Context) ([]dto.CategoryResponse, e
 }
 
 func (s *categoryService) GetCategoryById(ctx context.Context, categoryId uint) (dto.CategoryResponse, error) {
-	category, err := s.categoryRepo.GetCategoryByID(ctx, s.db, categoryId)
+	category, err := s.categoryRepo.GetCategoryByID(ctx, categoryId)
 	if err != nil {
 		return dto.CategoryResponse{}, err
 	}
@@ -74,5 +71,5 @@ func (s *categoryService) GetCategoryById(ctx context.Context, categoryId uint) 
 }
 
 func (s *categoryService) Delete(ctx context.Context, categoryId uint) error {
-	return s.categoryRepo.DeleteCategory(ctx, s.db, categoryId)
+	return s.categoryRepo.DeleteCategory(ctx, categoryId)
 }
