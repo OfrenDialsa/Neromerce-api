@@ -1,4 +1,4 @@
-name: Test Develop Branch
+name: Test Develop Branch with Postgres
 
 on:
   push:
@@ -11,12 +11,33 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: root
+          POSTGRES_DB: neromerce_test
+        options: >-
+          --health-cmd="pg_isready -U postgres -d neromerce_test"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    env:
+      DB_HOST_TEST: localhost
+      DB_USER_TEST: postgres
+      DB_PASS_TEST: root
+      DB_NAME_TEST: neromerce_test
+      DB_PORT_TEST: 5432
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0 
+          fetch-depth: 0
 
       - name: Set up Go
         uses: actions/setup-go@v4
@@ -26,5 +47,18 @@ jobs:
       - name: Install dependencies
         run: go mod download
 
+      - name: Wait for Postgres
+        run: |
+          until pg_isready -h $DB_HOST_TEST -p $DB_PORT_TEST -U $DB_USER_TEST; do
+            echo "Waiting for postgres..."
+            sleep 2
+          done
+
       - name: Run tests
         run: go test -v ./modules/.../tests/...
+        env:
+          DB_HOST_TEST: ${{ env.DB_HOST_TEST }}
+          DB_USER_TEST: ${{ env.DB_USER_TEST }}
+          DB_PASS_TEST: ${{ env.DB_PASS_TEST }}
+          DB_NAME_TEST: ${{ env.DB_NAME_TEST }}
+          DB_PORT_TEST: ${{ env.DB_PORT_TEST }}
