@@ -4,6 +4,8 @@ ifneq (,$(wildcard ./.env))
 		export $(shell sed 's/=.*//' .env)
 endif
 
+export CGO_ENABLED=1
+
 # Variables
 CONTAINER_NAME=${APP_NAME}-app
 POSTGRES_CONTAINER_NAME=${APP_NAME}-db

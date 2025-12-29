@@ -2,6 +2,7 @@ package entities
 
 import (
 	"github.com/google/uuid"
+	"github.com/ofrendialsa/neromerce/pkg/helpers"
 	"gorm.io/gorm"
 )
 
@@ -19,9 +20,9 @@ type Product struct {
 	Timestamp
 }
 
-func (p *Product) BeforeCreate(tx *gorm.DB) error {
-	if p.ID == uuid.Nil {
+func (p *Product) BeforeCreate(tx *gorm.DB) (err error) {
+	if p.ID == uuid.Nil && helpers.IsSQLite(tx) {
 		p.ID = uuid.New()
 	}
-	return nil
+	return
 }

@@ -42,6 +42,19 @@ services:
     networks:
       - app-network
 
+  postgres-test:
+    hostname: postgres-test
+    container_name: "${APP_NAME}-db-test"
+    image: postgres:latest
+    ports:
+      - "5434:5432"
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASS_TEST}
+      - POSTGRES_DB=${DB_NAME_TEST}
+    networks:
+      - app-network
+
 volumes:
   app-data:
 

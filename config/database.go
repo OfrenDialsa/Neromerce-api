@@ -44,13 +44,18 @@ func SetUpDatabaseConnection() *gorm.DB {
 }
 
 func SetUpTestDatabaseConnection() *gorm.DB {
-	dbUser := getEnvOrDefault("DB_USER", "postgres")
-	dbPass := getEnvOrDefault("DB_PASS", "password")
-	dbHost := getEnvOrDefault("DB_HOST", "localhost")
-	dbName := getEnvOrDefault("DB_NAME", "test_db")
-	dbPort := getEnvOrDefault("DB_PORT", "5432")
+	dbUser := os.Getenv("DB_USER_TEST")
+	dbPass := os.Getenv("DB_PASS_TEST")
+	dbHost := os.Getenv("DB_HOST_TEST")
+	dbName := os.Getenv("DB_NAME_TEST")
+	dbPort := os.Getenv("DB_PORT_TEST")
 
-	dsn := fmt.Sprintf("host=%v user=%v password=%v dbname=%v port=%v", dbHost, dbUser, dbPass, dbName, dbPort)
+	fmt.Println("TEST DB ENV:", dbHost, dbName)
+
+	dsn := fmt.Sprintf(
+		"host=%v user=%v password=%v dbname=%v port=%v sslmode=disable",
+		dbHost, dbUser, dbPass, dbName, dbPort,
+	)
 
 	db, err := gorm.Open(postgres.New(postgres.Config{
 		DSN:                  dsn,
