@@ -28,7 +28,7 @@ func NewCategoryService(repo repository.CategoryRepository) CategoryService {
 
 func (s *categoryService) Create(ctx context.Context, req dto.CategoryCreateRequest) (dto.CategoryResponse, error) {
 	category := entities.Category{
-		Name: req.Name, // ID auto increment, tidak perlu set manual
+		Name: req.Name,
 	}
 
 	saved, err := s.categoryRepo.CreateCategory(ctx, category)
@@ -37,7 +37,7 @@ func (s *categoryService) Create(ctx context.Context, req dto.CategoryCreateRequ
 	}
 
 	return dto.CategoryResponse{
-		ID:   strconv.Itoa(int(saved.ID)), // jika response tetap string
+		ID:   strconv.Itoa(int(saved.ID)),
 		Name: saved.Name,
 	}, nil
 }
