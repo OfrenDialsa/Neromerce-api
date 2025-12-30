@@ -15,34 +15,28 @@ import (
 )
 
 func TestGetProductByID(t *testing.T) {
-	// 1. Setup Mock & Service
 	mockRepo := new(repository.MockProductRepository)
-	// Kita bisa passing nil untuk gorm.DB di service saat testing jika service tidak memanggil db.Transaction
 	service := service.NewProductService(mockRepo, nil)
 
 	ctx := context.TODO()
 	productID := uuid.New()
 
 	t.Run("Success", func(t *testing.T) {
-		// 2. Ekspektasi: Jika Repo dipanggil dengan ID ini, kembalikan data produk
 		expectedProduct := entities.Product{
 			ID:   productID,
 			Name: "Laptop Gaming",
 		}
 		mockRepo.On("GetProductByID", ctx, mock.Anything, productID).Return(expectedProduct, nil).Once()
 
-		// 3. Eksekusi
 		result, err := service.GetProductByID(ctx, productID)
 
-		// 4. Asersi
 		assert.NoError(t, err)
 		assert.Equal(t, expectedProduct.Name, result.Name)
 		assert.Equal(t, expectedProduct.ID.String(), result.ID)
-		mockRepo.AssertExpectations(t) // Pastikan repo benar-benar dipanggil
+		mockRepo.AssertExpectations(t)
 	})
 
 	t.Run("Error Not Found", func(t *testing.T) {
-		// Ekspektasi: Repo mengembalikan error
 		mockRepo.On("GetProductByID", ctx, mock.Anything, productID).Return(entities.Product{}, errors.New("not found")).Once()
 
 		result, err := service.GetProductByID(ctx, productID)
@@ -107,7 +101,6 @@ func TestCreateProduct(t *testing.T) {
 			Stock: req.Stock,
 		}
 
-		// Menggunakan mock.MatchedBy untuk memverifikasi data yang masuk ke repo sama dengan req
 		mockRepo.On("CreateProduct", ctx, mock.Anything, mock.MatchedBy(func(p entities.Product) bool {
 			return p.Name == req.Name && p.Price == req.Price
 		})).Return(expectedEntity, nil).Once()
