@@ -2,8 +2,10 @@ package repository
 
 import (
 	"context"
+	"strings"
 
 	"github.com/ofrendialsa/neromerce/database/entities"
+	"github.com/ofrendialsa/neromerce/modules/category/dto"
 	"gorm.io/gorm"
 )
 
@@ -27,7 +29,14 @@ func NewCategoryRepository(db *gorm.DB) CategoryRepository {
 }
 
 func (r *categoryRepository) CreateCategory(ctx context.Context, category entities.Category) (entities.Category, error) {
-	if err := r.db.WithContext(ctx).Create(&category).Error; err != nil {
+
+	err := r.db.WithContext(ctx).Create(&category).Error
+	if err != nil {
+
+		if strings.Contains(err.Error(), "duplicate") || strings.Contains(err.Error(), "UNIQUE") {
+			return entities.Category{}, dto.ErrCategoryNameExist
+		}
+
 		return entities.Category{}, err
 	}
 
@@ -54,5 +63,16 @@ func (r *categoryRepository) GetCategoryByID(ctx context.Context, categoryId uin
 }
 
 func (r *categoryRepository) DeleteCategory(ctx context.Context, categoryId uint) error {
-	return r.db.WithContext(ctx).Delete(&entities.Category{}, categoryId).Error
+	result := r.db.WithContext(ctx).
+		Delete(&entities.Category{}, categoryId)
+
+	if result.Error != nil {
+		return result.Error
+	}
+
+	if result.RowsAffected == 0 {
+		return gorm.ErrRecordNotFound
+	}
+
+	return nil
 }

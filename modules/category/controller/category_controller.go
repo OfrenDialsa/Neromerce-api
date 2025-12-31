@@ -1,10 +1,12 @@
 package controller
 
 import (
+	"errors"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 	"github.com/ofrendialsa/neromerce/modules/category/dto"
 	"github.com/ofrendialsa/neromerce/modules/category/service"
 	"github.com/ofrendialsa/neromerce/modules/category/validation"
@@ -36,7 +38,7 @@ func (c *categoryController) Create(ctx *gin.Context) {
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		res := utils.BuildResponseFailed(
 			dto.MESSAGE_FAILED_GET_DATA_FROM_BODY,
-			err.Error(),
+			"request format invalid",
 			nil,
 		)
 		ctx.JSON(http.StatusBadRequest, res)
@@ -44,24 +46,43 @@ func (c *categoryController) Create(ctx *gin.Context) {
 	}
 
 	if err := c.categoryValidation.ValidateCategoryCreateRequest(req); err != nil {
-		res := utils.BuildResponseFailed(
-			dto.MESSAGE_FAILED_CREATE_CATEGORY,
-			err.Error(),
-			nil,
-		)
-		ctx.JSON(http.StatusBadRequest, res)
-		return
+		if ve, ok := err.(validator.ValidationErrors); ok {
+			e := ve[0]
+			var msg string
+			switch e.Tag() {
+			case "required":
+				msg = "category name is required"
+			case "name":
+				msg = "category name must be at most 100 characters"
+			}
+			res := utils.BuildResponseFailed(dto.MESSAGE_FAILED_CREATE_CATEGORY, msg, nil)
+			ctx.JSON(http.StatusBadRequest, res)
+			return
+		}
 	}
 
 	category, err := c.categoryService.Create(ctx.Request.Context(), req)
 	if err != nil {
-		res := utils.BuildResponseFailed(
-			dto.MESSAGE_FAILED_CREATE_CATEGORY,
-			err.Error(),
-			nil,
-		)
-		ctx.JSON(http.StatusInternalServerError, res)
-		return
+
+		switch {
+		case errors.Is(err, dto.ErrCategoryNameExist):
+			res := utils.BuildResponseFailed(
+				dto.MESSAGE_FAILED_CREATE_CATEGORY,
+				"category already exists",
+				nil,
+			)
+			ctx.JSON(http.StatusConflict, res)
+			return
+
+		default:
+			res := utils.BuildResponseFailed(
+				dto.MESSAGE_FAILED_CREATE_CATEGORY,
+				"internal server error",
+				nil,
+			)
+			ctx.JSON(http.StatusInternalServerError, res)
+			return
+		}
 	}
 
 	res := utils.BuildResponseSuccess(
@@ -145,7 +166,7 @@ func (c *categoryController) Delete(ctx *gin.Context) {
 	); err != nil {
 		res := utils.BuildResponseFailed(
 			dto.MESSAGE_FAILED_DELETE_CATEGORY,
-			err.Error(),
+			"category id not found",
 			nil,
 		)
 		ctx.JSON(http.StatusBadRequest, res)
