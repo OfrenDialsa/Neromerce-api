@@ -132,7 +132,7 @@ func (c *categoryController) GetCategoryByID(ctx *gin.Context) {
 	if err != nil {
 		res := utils.BuildResponseFailed(
 			dto.MESSAGE_FAILED_GET_CATEGORY,
-			err.Error(),
+			"category id not found",
 			nil,
 		)
 		ctx.JSON(http.StatusNotFound, res)
