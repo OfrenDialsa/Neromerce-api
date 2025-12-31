@@ -9,10 +9,10 @@ import (
 
 type (
 	CategoryRepository interface {
-		CreateCategory(ctx context.Context, tx *gorm.DB, category entities.Category) (entities.Category, error)
-		GetCategoryByID(ctx context.Context, tx *gorm.DB, categoryId uint) (entities.Category, error)
-		GetAllCategories(ctx context.Context, tx *gorm.DB) ([]entities.Category, error)
-		DeleteCategory(ctx context.Context, tx *gorm.DB, categoryId uint) error
+		CreateCategory(ctx context.Context, category entities.Category) (entities.Category, error)
+		GetCategoryByID(ctx context.Context, categoryId uint) (entities.Category, error)
+		GetAllCategories(ctx context.Context) ([]entities.Category, error)
+		DeleteCategory(ctx context.Context, categoryId uint) error
 	}
 
 	categoryRepository struct {
@@ -26,52 +26,33 @@ func NewCategoryRepository(db *gorm.DB) CategoryRepository {
 	}
 }
 
-func (c *categoryRepository) CreateCategory(ctx context.Context, tx *gorm.DB, category entities.Category) (entities.Category, error) {
-	if tx == nil {
-		tx = c.db
-	}
-
-	if err := tx.WithContext(ctx).Create(&category).Error; err != nil {
+func (r *categoryRepository) CreateCategory(ctx context.Context, category entities.Category) (entities.Category, error) {
+	if err := r.db.WithContext(ctx).Create(&category).Error; err != nil {
 		return entities.Category{}, err
 	}
 
 	return category, nil
 }
 
-func (c *categoryRepository) GetAllCategories(ctx context.Context, tx *gorm.DB) ([]entities.Category, error) {
-	if tx == nil {
-		tx = c.db
-	}
+func (r *categoryRepository) GetAllCategories(ctx context.Context) ([]entities.Category, error) {
 
 	var categories []entities.Category
-	if err := tx.WithContext(ctx).Find(&categories).Error; err != nil {
+	if err := r.db.WithContext(ctx).Find(&categories).Error; err != nil {
 		return nil, err
 	}
 
 	return categories, nil
 }
 
-func (c *categoryRepository) GetCategoryByID(ctx context.Context, tx *gorm.DB, categoryId uint) (entities.Category, error) {
-	if tx == nil {
-		tx = c.db
-	}
-
+func (r *categoryRepository) GetCategoryByID(ctx context.Context, categoryId uint) (entities.Category, error) {
 	var category entities.Category
-	if err := tx.WithContext(ctx).First(&category, categoryId).Error; err != nil {
+	if err := r.db.WithContext(ctx).First(&category, categoryId).Error; err != nil {
 		return entities.Category{}, err
 	}
 
 	return category, nil
 }
 
-func (c *categoryRepository) DeleteCategory(ctx context.Context, tx *gorm.DB, categoryId uint) error {
-	if tx == nil {
-		tx = c.db
-	}
-
-	if err := tx.WithContext(ctx).Delete(&entities.Category{}, categoryId).Error; err != nil {
-		return err
-	}
-
-	return nil
+func (r *categoryRepository) DeleteCategory(ctx context.Context, categoryId uint) error {
+	return r.db.WithContext(ctx).Delete(&entities.Category{}, categoryId).Error
 }

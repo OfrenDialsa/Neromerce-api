@@ -38,7 +38,7 @@ func RegisterDependencies(injector *do.Injector) {
 
 	userService := userService.NewUserService(userRepository, db)
 	authService := authService.NewAuthService(userRepository, refreshTokenRepository, jwtService, db)
-	categoryService := categoryService.NewCategoryService(categoryRepository, db)
+	categoryService := categoryService.NewCategoryService(categoryRepository)
 
 	do.Provide(
 		injector, func(i *do.Injector) (userController.UserController, error) {
@@ -54,7 +54,7 @@ func RegisterDependencies(injector *do.Injector) {
 
 	do.Provide(
 		injector, func(i *do.Injector) (categoryController.CategoryController, error) {
-			return categoryController.NewCategoryController(i, categoryService), nil
+			return categoryController.NewCategoryController(categoryService), nil
 		},
 	)
 }
