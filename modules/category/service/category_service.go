@@ -12,7 +12,6 @@ import (
 type CategoryService interface {
 	Create(ctx context.Context, req dto.CategoryCreateRequest) (dto.CategoryResponse, error)
 	GetAll(ctx context.Context) ([]dto.CategoryResponse, error)
-	GetCategoryById(ctx context.Context, categoryId uint) (dto.CategoryResponse, error)
 	Delete(ctx context.Context, categoryId uint) error
 }
 
@@ -56,18 +55,6 @@ func (s *categoryService) GetAll(ctx context.Context) ([]dto.CategoryResponse, e
 		})
 	}
 	return resp, nil
-}
-
-func (s *categoryService) GetCategoryById(ctx context.Context, categoryId uint) (dto.CategoryResponse, error) {
-	category, err := s.categoryRepo.GetCategoryByID(ctx, categoryId)
-	if err != nil {
-		return dto.CategoryResponse{}, err
-	}
-
-	return dto.CategoryResponse{
-		ID:   strconv.Itoa(int(category.ID)),
-		Name: category.Name,
-	}, nil
 }
 
 func (s *categoryService) Delete(ctx context.Context, categoryId uint) error {

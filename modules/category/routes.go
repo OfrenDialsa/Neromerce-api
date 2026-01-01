@@ -19,7 +19,6 @@ func RegisterRoutes(server *gin.Engine, injector *do.Injector) {
 	{
 		categoryRoutes.GET("", categoryController.GetAll)
 		categoryRoutes.POST("", authAccess, roleAccess, categoryController.Create)
-		categoryRoutes.GET("/:id", categoryController.GetCategoryByID)
 		categoryRoutes.DELETE("/:id", authAccess, roleAccess, categoryController.Delete)
 	}
 }

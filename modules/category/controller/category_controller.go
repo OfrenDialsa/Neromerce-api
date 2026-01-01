@@ -16,7 +16,6 @@ import (
 type CategoryController interface {
 	Create(ctx *gin.Context)
 	GetAll(ctx *gin.Context)
-	GetCategoryByID(ctx *gin.Context)
 	Delete(ctx *gin.Context)
 }
 
@@ -107,41 +106,6 @@ func (c *categoryController) GetAll(ctx *gin.Context) {
 	res := utils.BuildResponseSuccess(
 		dto.MESSAGE_SUCCESS_GET_LIST_CATEGORY,
 		categories,
-	)
-	ctx.JSON(http.StatusOK, res)
-}
-
-func (c *categoryController) GetCategoryByID(ctx *gin.Context) {
-	idParam := ctx.Param("id")
-
-	categoryId, err := strconv.ParseUint(idParam, 10, 64)
-	if err != nil {
-		res := utils.BuildResponseFailed(
-			dto.MESSAGE_FAILED_GET_CATEGORY,
-			"invalid category id",
-			nil,
-		)
-		ctx.JSON(http.StatusBadRequest, res)
-		return
-	}
-
-	category, err := c.categoryService.GetCategoryById(
-		ctx.Request.Context(),
-		uint(categoryId),
-	)
-	if err != nil {
-		res := utils.BuildResponseFailed(
-			dto.MESSAGE_FAILED_GET_CATEGORY,
-			"category id not found",
-			nil,
-		)
-		ctx.JSON(http.StatusNotFound, res)
-		return
-	}
-
-	res := utils.BuildResponseSuccess(
-		dto.MESSAGE_SUCCESS_GET_CATEGORY,
-		category,
 	)
 	ctx.JSON(http.StatusOK, res)
 }

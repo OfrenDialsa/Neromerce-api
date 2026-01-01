@@ -12,7 +12,6 @@ import (
 type (
 	CategoryRepository interface {
 		CreateCategory(ctx context.Context, category entities.Category) (entities.Category, error)
-		GetCategoryByID(ctx context.Context, categoryId uint) (entities.Category, error)
 		GetAllCategories(ctx context.Context) ([]entities.Category, error)
 		DeleteCategory(ctx context.Context, categoryId uint) error
 	}
@@ -51,15 +50,6 @@ func (r *categoryRepository) GetAllCategories(ctx context.Context) ([]entities.C
 	}
 
 	return categories, nil
-}
-
-func (r *categoryRepository) GetCategoryByID(ctx context.Context, categoryId uint) (entities.Category, error) {
-	var category entities.Category
-	if err := r.db.WithContext(ctx).First(&category, categoryId).Error; err != nil {
-		return entities.Category{}, err
-	}
-
-	return category, nil
 }
 
 func (r *categoryRepository) DeleteCategory(ctx context.Context, categoryId uint) error {
