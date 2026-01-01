@@ -127,3 +127,6 @@ migrate-seed-docker:
 
 go-tidy-docker:
 	docker exec -it ${CONTAINER_NAME} /bin/sh -c "go mod tidy"
+
+clean-docker:
+	docker exec -it ${CONTAINER_NAME} /bin/sh -c "go clean -cache -i && echo 'Go cache cleaned inside Docker container'"

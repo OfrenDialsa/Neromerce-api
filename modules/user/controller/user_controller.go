@@ -41,9 +41,9 @@ func NewUserController(injector *do.Injector, us service.UserService) UserContro
 }
 
 func (c *userController) GetAllUser(ctx *gin.Context) {
+
 	var filter = &query.UserFilter{}
 	filter.BindPagination(ctx)
-
 	ctx.ShouldBindQuery(filter)
 
 	users, total, err := pagination.PaginatedQueryWithIncludable[query.User](c.db, filter)

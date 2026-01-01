@@ -115,12 +115,19 @@ func (c *authController) RefreshToken(ctx *gin.Context) {
 }
 
 func (c *authController) Logout(ctx *gin.Context) {
-	userId := ctx.MustGet("user_id").(string)
+	userIdI, exists := ctx.Get("user_id")
+	if !exists {
+		res := utils.BuildResponseFailed(dto.MESSAGE_FAILED_LOGOUT, "User not logged in", nil)
+		ctx.JSON(http.StatusUnauthorized, res)
+		return
+	}
+
+	userId := userIdI.(string)
 
 	err := c.authService.Logout(ctx.Request.Context(), userId)
 	if err != nil {
 		res := utils.BuildResponseFailed(dto.MESSAGE_FAILED_LOGOUT, err.Error(), nil)
-		ctx.JSON(http.StatusBadRequest, res)
+		ctx.JSON(http.StatusInternalServerError, res)
 		return
 	}
 
