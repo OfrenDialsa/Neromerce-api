@@ -13,7 +13,7 @@ func RegisterRoutes(server *gin.Engine, injector *do.Injector) {
 	categoryController := do.MustInvoke[controller.CategoryController](injector)
 	jwtService := do.MustInvokeNamed[service.JWTService](injector, constants.JWTService)
 	authAccess := middlewares.Authenticate(jwtService)
-	roleAccess := middlewares.AuthorizeRole(jwtService, "admin")
+	roleAccess := middlewares.Authorize("admin")
 
 	categoryRoutes := server.Group("/api/category")
 	{
