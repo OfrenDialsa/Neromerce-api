@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"errors"
 
 	"github.com/google/uuid"
 	"github.com/ofrendialsa/neromerce/database/entities"
@@ -69,7 +68,7 @@ func (p *productService) UpdateProduct(ctx context.Context, req dto.ProductUpdat
 	}
 
 	if len(updates) == 0 {
-		return dto.ProductResponse{}, errors.New("no fields to update")
+		return dto.ProductResponse{}, dto.ErrUpdateProduct
 	}
 
 	updated, err := p.productRepository.UpdateProduct(ctx, p.db, productId, updates)

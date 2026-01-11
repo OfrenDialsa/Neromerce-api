@@ -25,6 +25,7 @@ var (
 	ErrCreateProduct    = errors.New("failed to create product")
 	ErrGetProductById   = errors.New("failed to get product by id")
 	ErrProductNotFound  = errors.New("product not found")
+	ErrUpdateProduct    = errors.New("no fields to update")
 	ErrDeleteProduct    = errors.New("failed to delete product")
 	ErrProductNameExist = errors.New("product name already exist")
 )
