@@ -25,6 +25,7 @@ var (
 	ErrCreateProduct    = errors.New("failed to create product")
 	ErrGetProductById   = errors.New("failed to get product by id")
 	ErrProductNotFound  = errors.New("product not found")
+	ErrUpdateProduct    = errors.New("no fields to update")
 	ErrDeleteProduct    = errors.New("failed to delete product")
 	ErrProductNameExist = errors.New("product name already exist")
 )
@@ -37,6 +38,15 @@ type (
 		Stock       int     `json:"stock" validate:"gte=0"`
 		ImageURL    string  `json:"image_url"`
 		CategoryID  uint    `json:"category_id" validate:"required"`
+	}
+
+	ProductUpdateRequest struct {
+		Name        *string  `json:"name" validate:"omitempty"`
+		Description *string  `json:"description" validate:"omitempty"`
+		Price       *float64 `json:"price" validate:"omitempty,gt=0"`
+		Stock       *int     `json:"stock" validate:"omitempty,gte=0"`
+		ImageURL    *string  `json:"image_url" validate:"omitempty"`
+		CategoryID  *uint    `json:"category_id" validate:"omitempty"`
 	}
 
 	ProductResponse struct {

@@ -6,6 +6,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/ofrendialsa/neromerce/database/entities"
 	"github.com/ofrendialsa/neromerce/modules/product/dto"
+	"github.com/ofrendialsa/neromerce/modules/product/mapper"
 	"github.com/ofrendialsa/neromerce/modules/product/repository"
 	"gorm.io/gorm"
 )
@@ -14,6 +15,7 @@ type ProductService interface {
 	CreateProduct(ctx context.Context, req dto.ProductCreateRequest) (dto.ProductResponse, error)
 	GetAllProducts(ctx context.Context) ([]dto.ProductResponse, error)
 	GetProductByID(ctx context.Context, productId uuid.UUID) (dto.ProductResponse, error)
+	UpdateProduct(ctx context.Context, req dto.ProductUpdateRequest, productId uuid.UUID) (dto.ProductResponse, error)
 	DeleteProduct(ctx context.Context, productId uuid.UUID) error
 }
 
@@ -38,15 +40,43 @@ func (p *productService) CreateProduct(ctx context.Context, req dto.ProductCreat
 		return dto.ProductResponse{}, err
 	}
 
-	return dto.ProductResponse{
-		ID:          saved.ID.String(),
-		Name:        saved.Name,
-		Description: saved.Description,
-		Price:       saved.Price,
-		Stock:       saved.Stock,
-		ImageURL:    saved.ImageURL,
-		CategoryID:  saved.CategoryID,
-	}, nil
+	return mapper.ProductToResponse(saved), nil
+}
+
+// UpdateProduct implements ProductService.
+func (p *productService) UpdateProduct(ctx context.Context, req dto.ProductUpdateRequest, productId uuid.UUID) (dto.ProductResponse, error) {
+
+	updates := map[string]interface{}{}
+
+	if req.Name != nil {
+		updates["name"] = *req.Name
+	}
+	if req.Description != nil {
+		updates["description"] = *req.Description
+	}
+	if req.Price != nil {
+		updates["price"] = *req.Price
+	}
+	if req.Stock != nil {
+		updates["stock"] = *req.Stock
+	}
+	if req.ImageURL != nil {
+		updates["image_url"] = *req.ImageURL
+	}
+	if req.CategoryID != nil {
+		updates["category_id"] = *req.CategoryID
+	}
+
+	if len(updates) == 0 {
+		return dto.ProductResponse{}, dto.ErrUpdateProduct
+	}
+
+	updated, err := p.productRepository.UpdateProduct(ctx, p.db, productId, updates)
+	if err != nil {
+		return dto.ProductResponse{}, err
+	}
+
+	return mapper.ProductToResponse(updated), nil
 }
 
 // GetAllProducts implements ProductService.
@@ -78,15 +108,7 @@ func (p *productService) GetProductByID(ctx context.Context, productId uuid.UUID
 		return dto.ProductResponse{}, err
 	}
 
-	return dto.ProductResponse{
-		ID:          product.ID.String(),
-		Name:        product.Name,
-		Description: product.Description,
-		Price:       product.Price,
-		Stock:       product.Stock,
-		ImageURL:    product.ImageURL,
-		CategoryID:  product.CategoryID,
-	}, nil
+	return mapper.ProductToResponse(product), nil
 }
 
 // DeleteProduct implements ProductService.

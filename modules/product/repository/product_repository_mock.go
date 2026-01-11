@@ -15,21 +15,59 @@ type MockProductRepository struct {
 
 func (m *MockProductRepository) GetProductByID(ctx context.Context, tx *gorm.DB, productId uuid.UUID) (entities.Product, error) {
 	args := m.Called(ctx, tx, productId)
-	return args.Get(0).(entities.Product), args.Error(1)
+	if args.Get(0) == nil {
+		return entities.Product{}, args.Error(1)
+	}
+
+	product, ok := args.Get(0).(entities.Product)
+	if !ok {
+		return entities.Product{}, args.Error(1)
+	}
+
+	return product, args.Error(1)
 }
 
 func (m *MockProductRepository) CreateProduct(ctx context.Context, tx *gorm.DB, product entities.Product) (entities.Product, error) {
 	args := m.Called(ctx, tx, product)
-	return args.Get(0).(entities.Product), args.Error(1)
+	if args.Get(0) == nil {
+		return entities.Product{}, args.Error(1)
+	}
+
+	res, ok := args.Get(0).(entities.Product)
+	if !ok {
+		return entities.Product{}, args.Error(1)
+	}
+
+	return res, args.Error(1)
+}
+
+func (m *MockProductRepository) UpdateProduct(ctx context.Context, tx *gorm.DB, productId uuid.UUID, updates map[string]interface{}) (entities.Product, error) {
+	args := m.Called(ctx, tx, productId, updates)
+	if args.Get(0) == nil {
+		return entities.Product{}, args.Error(1)
+	}
+
+	res, ok := args.Get(0).(entities.Product)
+	if !ok {
+		return entities.Product{}, args.Error(1)
+	}
+
+	return res, args.Error(1)
 }
 
 func (m *MockProductRepository) GetAllProducts(ctx context.Context, tx *gorm.DB) ([]entities.Product, error) {
 	args := m.Called(ctx, tx)
-	// Kita perlu handle return slice agar tidak panic jika nil
+
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
-	return args.Get(0).([]entities.Product), args.Error(1)
+
+	products, ok := args.Get(0).([]entities.Product)
+	if !ok {
+		return nil, args.Error(1)
+	}
+
+	return products, args.Error(1)
 }
 
 func (m *MockProductRepository) DeleteProduct(ctx context.Context, tx *gorm.DB, productId uuid.UUID) error {
