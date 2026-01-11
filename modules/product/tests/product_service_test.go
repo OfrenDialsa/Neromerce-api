@@ -139,3 +139,71 @@ func TestDeleteProduct(t *testing.T) {
 		mockRepo.AssertExpectations(t)
 	})
 }
+func TestUpdateProduct(t *testing.T) {
+	mockRepo := new(repository.MockProductRepository)
+	svc := service.NewProductService(mockRepo, nil)
+	ctx := context.TODO()
+	productID := uuid.New()
+
+	name := "Updated Name"
+	price := 2000.0
+	stock := 10
+
+	req := dto.ProductUpdateRequest{
+		Name:  &name,
+		Price: &price,
+		Stock: &stock,
+	}
+
+	t.Run("Success", func(t *testing.T) {
+		expectedEntity := entities.Product{
+			ID:    productID,
+			Name:  name,
+			Price: price,
+			Stock: stock,
+		}
+
+		mockRepo.
+			On(
+				"UpdateProduct",
+				ctx,
+				mock.Anything,
+				productID,
+				mock.MatchedBy(func(m map[string]interface{}) bool {
+					return m["name"] == name &&
+						m["price"] == price &&
+						m["stock"] == stock
+				}),
+			).
+			Return(expectedEntity, nil).
+			Once()
+
+		result, err := svc.UpdateProduct(ctx, req, productID)
+
+		assert.NoError(t, err)
+		assert.Equal(t, productID.String(), result.ID)
+		assert.Equal(t, name, result.Name)
+
+		mockRepo.AssertExpectations(t)
+	})
+
+	t.Run("Failed", func(t *testing.T) {
+		mockRepo.
+			On(
+				"UpdateProduct",
+				ctx,
+				mock.Anything,
+				productID,
+				mock.Anything,
+			).
+			Return(entities.Product{}, errors.New("update failed")).
+			Once()
+
+		result, err := svc.UpdateProduct(ctx, req, productID)
+
+		assert.Error(t, err)
+		assert.Empty(t, result.ID)
+
+		mockRepo.AssertExpectations(t)
+	})
+}

@@ -127,4 +127,48 @@ func TestProductRepository_CRUD(t *testing.T) {
 	productsAfterDelete, err := repo.GetAllProducts(ctx, nil)
 	assert.NoError(t, err)
 	assert.Len(t, productsAfterDelete, 0)
+
+	t.Run("Update product", func(t *testing.T) {
+		original := entities.Product{
+			Name:        "Old Name",
+			Description: "Old Description",
+			Price:       100,
+			Stock:       10,
+			CategoryID:  category.ID,
+		}
+
+		created, err := repo.CreateProduct(ctx, nil, original)
+		assert.NoError(t, err)
+
+		updateData := map[string]interface{}{
+			"name":        "New Name",
+			"description": "New Description",
+			"price":       200.0,
+			"stock":       5,
+			"category_id": category.ID,
+		}
+
+		updated, err := repo.UpdateProduct(ctx, nil, created.ID, updateData)
+		assert.NoError(t, err)
+
+		assert.Equal(t, created.ID, updated.ID)
+		assert.Equal(t, "New Name", updated.Name)
+		assert.Equal(t, "New Description", updated.Description)
+		assert.Equal(t, 200.0, updated.Price)
+		assert.Equal(t, 5, updated.Stock)
+	})
+
+	t.Run("Update product not found", func(t *testing.T) {
+		_, err := repo.UpdateProduct(
+			ctx,
+			nil,
+			uuid.New(),
+			map[string]interface{}{
+				"name": "Does not exist",
+			},
+		)
+
+		assert.Error(t, err)
+	})
+
 }

@@ -39,6 +39,15 @@ type (
 		CategoryID  uint    `json:"category_id" validate:"required"`
 	}
 
+	ProductUpdateRequest struct {
+		Name        *string  `json:"name" validate:"omitempty"`
+		Description *string  `json:"description" validate:"omitempty"`
+		Price       *float64 `json:"price" validate:"omitempty,gt=0"`
+		Stock       *int     `json:"stock" validate:"omitempty,gte=0"`
+		ImageURL    *string  `json:"image_url" validate:"omitempty"`
+		CategoryID  *uint    `json:"category_id" validate:"omitempty"`
+	}
+
 	ProductResponse struct {
 		ID          string  `json:"id"`
 		Name        string  `json:"name"`

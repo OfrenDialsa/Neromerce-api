@@ -13,6 +13,7 @@ type (
 		CreateProduct(ctx context.Context, tx *gorm.DB, product entities.Product) (entities.Product, error)
 		GetProductByID(ctx context.Context, tx *gorm.DB, productId uuid.UUID) (entities.Product, error)
 		GetAllProducts(ctx context.Context, tx *gorm.DB) ([]entities.Product, error)
+		UpdateProduct(ctx context.Context, tx *gorm.DB, productId uuid.UUID, updates map[string]interface{}) (entities.Product, error)
 		DeleteProduct(ctx context.Context, tx *gorm.DB, productId uuid.UUID) error
 	}
 
@@ -38,6 +39,33 @@ func (p *productRepository) CreateProduct(ctx context.Context, tx *gorm.DB, prod
 	}
 
 	if err := tx.WithContext(ctx).Create(&product).Error; err != nil {
+		return entities.Product{}, err
+	}
+
+	return product, nil
+}
+
+// UpdateProduct implements ProductRepository.
+func (p *productRepository) UpdateProduct(ctx context.Context, tx *gorm.DB, productId uuid.UUID, updates map[string]interface{}) (entities.Product, error) {
+
+	if tx == nil {
+		tx = p.db
+	}
+
+	if len(updates) == 0 {
+		return entities.Product{}, gorm.ErrInvalidData
+	}
+
+	if err := tx.WithContext(ctx).
+		Model(&entities.Product{}).
+		Where("id = ?", productId).
+		Updates(updates).Error; err != nil {
+		return entities.Product{}, err
+	}
+
+	var product entities.Product
+	if err := tx.WithContext(ctx).
+		First(&product, "id = ?", productId).Error; err != nil {
 		return entities.Product{}, err
 	}
 
