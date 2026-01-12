@@ -12,11 +12,11 @@ import (
 )
 
 type ProductService interface {
-	CreateProduct(ctx context.Context, req dto.ProductCreateRequest) (dto.ProductResponse, error)
-	GetAllProducts(ctx context.Context) ([]dto.ProductResponse, error)
-	GetProductByID(ctx context.Context, productId uuid.UUID) (dto.ProductResponse, error)
-	UpdateProduct(ctx context.Context, req dto.ProductUpdateRequest, productId uuid.UUID) (dto.ProductResponse, error)
-	DeleteProduct(ctx context.Context, productId uuid.UUID) error
+	Create(ctx context.Context, req dto.ProductCreateRequest) (dto.ProductResponse, error)
+	GetAll(ctx context.Context) ([]dto.ProductResponse, error)
+	GetByID(ctx context.Context, productId uuid.UUID) (dto.ProductResponse, error)
+	Update(ctx context.Context, req dto.ProductUpdateRequest, productId uuid.UUID) (dto.ProductResponse, error)
+	Delete(ctx context.Context, productId uuid.UUID) error
 }
 
 type productService struct {
@@ -25,7 +25,7 @@ type productService struct {
 }
 
 // CreateProduct implements ProductService.
-func (p *productService) CreateProduct(ctx context.Context, req dto.ProductCreateRequest) (dto.ProductResponse, error) {
+func (p *productService) Create(ctx context.Context, req dto.ProductCreateRequest) (dto.ProductResponse, error) {
 	product := entities.Product{
 		Name:        req.Name,
 		Description: req.Description,
@@ -44,7 +44,7 @@ func (p *productService) CreateProduct(ctx context.Context, req dto.ProductCreat
 }
 
 // UpdateProduct implements ProductService.
-func (p *productService) UpdateProduct(ctx context.Context, req dto.ProductUpdateRequest, productId uuid.UUID) (dto.ProductResponse, error) {
+func (p *productService) Update(ctx context.Context, req dto.ProductUpdateRequest, productId uuid.UUID) (dto.ProductResponse, error) {
 
 	updates := map[string]interface{}{}
 
@@ -80,7 +80,7 @@ func (p *productService) UpdateProduct(ctx context.Context, req dto.ProductUpdat
 }
 
 // GetAllProducts implements ProductService.
-func (p *productService) GetAllProducts(ctx context.Context) ([]dto.ProductResponse, error) {
+func (p *productService) GetAll(ctx context.Context) ([]dto.ProductResponse, error) {
 	products, err := p.productRepository.GetAllProducts(ctx, p.db)
 	if err != nil {
 		return nil, err
@@ -102,7 +102,7 @@ func (p *productService) GetAllProducts(ctx context.Context) ([]dto.ProductRespo
 }
 
 // GetProductByID implements ProductService.
-func (p *productService) GetProductByID(ctx context.Context, productId uuid.UUID) (dto.ProductResponse, error) {
+func (p *productService) GetByID(ctx context.Context, productId uuid.UUID) (dto.ProductResponse, error) {
 	product, err := p.productRepository.GetProductByID(ctx, p.db, productId)
 	if err != nil {
 		return dto.ProductResponse{}, err
@@ -112,7 +112,7 @@ func (p *productService) GetProductByID(ctx context.Context, productId uuid.UUID
 }
 
 // DeleteProduct implements ProductService.
-func (p *productService) DeleteProduct(ctx context.Context, productId uuid.UUID) error {
+func (p *productService) Delete(ctx context.Context, productId uuid.UUID) error {
 	return p.productRepository.DeleteProduct(ctx, p.db, productId)
 }
 

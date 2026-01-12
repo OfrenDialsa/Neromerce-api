@@ -28,7 +28,7 @@ func TestGetProductByID(t *testing.T) {
 		}
 		mockRepo.On("GetProductByID", ctx, mock.Anything, productID).Return(expectedProduct, nil).Once()
 
-		result, err := service.GetProductByID(ctx, productID)
+		result, err := service.GetByID(ctx, productID)
 
 		assert.NoError(t, err)
 		assert.Equal(t, expectedProduct.Name, result.Name)
@@ -39,7 +39,7 @@ func TestGetProductByID(t *testing.T) {
 	t.Run("Error Not Found", func(t *testing.T) {
 		mockRepo.On("GetProductByID", ctx, mock.Anything, productID).Return(entities.Product{}, errors.New("not found")).Once()
 
-		result, err := service.GetProductByID(ctx, productID)
+		result, err := service.GetByID(ctx, productID)
 
 		assert.Error(t, err)
 		assert.Empty(t, result.Name)
@@ -61,7 +61,7 @@ func TestGetAllProducts(t *testing.T) {
 
 		mockRepo.On("GetAllProducts", ctx, mock.Anything).Return(expectedEntities, nil).Once()
 
-		result, err := service.GetAllProducts(ctx)
+		result, err := service.GetAll(ctx)
 
 		assert.NoError(t, err)
 		assert.Len(t, result, 2)
@@ -73,7 +73,7 @@ func TestGetAllProducts(t *testing.T) {
 	t.Run("Error Database", func(t *testing.T) {
 		mockRepo.On("GetAllProducts", ctx, mock.Anything).Return([]entities.Product{}, errors.New("db error")).Once()
 
-		result, err := service.GetAllProducts(ctx)
+		result, err := service.GetAll(ctx)
 
 		assert.Error(t, err)
 		assert.Nil(t, result)
@@ -105,7 +105,7 @@ func TestCreateProduct(t *testing.T) {
 			return p.Name == req.Name && p.Price == req.Price
 		})).Return(expectedEntity, nil).Once()
 
-		result, err := service.CreateProduct(ctx, req)
+		result, err := service.Create(ctx, req)
 
 		assert.NoError(t, err)
 		assert.Equal(t, productID.String(), result.ID)
@@ -123,7 +123,7 @@ func TestDeleteProduct(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		mockRepo.On("DeleteProduct", ctx, mock.Anything, productID).Return(nil).Once()
 
-		err := service.DeleteProduct(ctx, productID)
+		err := service.Delete(ctx, productID)
 
 		assert.NoError(t, err)
 		mockRepo.AssertExpectations(t)
@@ -132,7 +132,7 @@ func TestDeleteProduct(t *testing.T) {
 	t.Run("Failed", func(t *testing.T) {
 		mockRepo.On("DeleteProduct", ctx, mock.Anything, productID).Return(errors.New("failed to delete")).Once()
 
-		err := service.DeleteProduct(ctx, productID)
+		err := service.Delete(ctx, productID)
 
 		assert.Error(t, err)
 		assert.Equal(t, "failed to delete", err.Error())
@@ -178,7 +178,7 @@ func TestUpdateProduct(t *testing.T) {
 			Return(expectedEntity, nil).
 			Once()
 
-		result, err := svc.UpdateProduct(ctx, req, productID)
+		result, err := svc.Update(ctx, req, productID)
 
 		assert.NoError(t, err)
 		assert.Equal(t, productID.String(), result.ID)
@@ -199,7 +199,7 @@ func TestUpdateProduct(t *testing.T) {
 			Return(entities.Product{}, errors.New("update failed")).
 			Once()
 
-		result, err := svc.UpdateProduct(ctx, req, productID)
+		result, err := svc.Update(ctx, req, productID)
 
 		assert.Error(t, err)
 		assert.Empty(t, result.ID)

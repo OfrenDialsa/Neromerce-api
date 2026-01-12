@@ -7,6 +7,7 @@ import (
 	"github.com/ofrendialsa/neromerce/middlewares"
 	"github.com/ofrendialsa/neromerce/modules/auth"
 	"github.com/ofrendialsa/neromerce/modules/category"
+	products "github.com/ofrendialsa/neromerce/modules/product"
 	"github.com/ofrendialsa/neromerce/modules/user"
 	"github.com/ofrendialsa/neromerce/providers"
 	"github.com/ofrendialsa/neromerce/script"
@@ -66,6 +67,7 @@ func main() {
 	user.RegisterRoutes(server, injector)
 	auth.RegisterRoutes(server, injector)
 	category.RegisterRoutes(server, injector)
+	products.RegisterRoutes(server, injector)
 
 	run(server)
 }
